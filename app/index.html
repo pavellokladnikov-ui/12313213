@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Day Trader — Профессиональный дневник трейдера</title>
+  <meta name="description" content="Автоматический дневник трейдера с подключением API Binance, Bybit, OKX, MEXC, BingX, Gate.io, Kraken, HTX, Bitunix. Аналитика, статистика, календарь прибыли.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2300d4aa'/><text x='50' y='68' font-size='50' font-weight='800' text-anchor='middle' fill='%230a0b0f'>DT</text></svg>">
+</head>
+<body>
+
+<!-- ========== AUTH OVERLAY ========== -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-container">
+    <div class="auth-left">
+      <div class="auth-brand">
+        <div class="logo-icon-large">DT</div>
+        <h1>Day Trader</h1>
+      </div>
+      <p class="tagline" data-i18n="tagline">Профессиональный дневник трейдера. Автоматическая загрузка сделок, аналитика и статистика по всем вашим биржам в одном месте.</p>
+      <ul class="auth-features">
+        <li>
+          <svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          <span data-i18n="feat_unlimited">Неограниченное количество подключений</span>
+        </li>
+        <li>
+          <svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          <span data-i18n="feat_sync">Автоматическая синхронизация по API</span>
+        </li>
+        <li>
+          <svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          <span data-i18n="feat_notes">Комментарии, скриншоты и видео к сделкам</span>
+        </li>
+        <li>
+          <svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          <span data-i18n="feat_privacy">Полная анонимность — мы не храним личные данные</span>
+        </li>
+        <li>
+          <svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          <span data-i18n="feat_exchanges">Поддержка 9 крупнейших бирж</span>
+        </li>
+      </ul>
+      <div class="auth-footer">
+        <span class="exchange-badge">Binance</span>
+        <span class="exchange-badge">Bybit</span>
+        <span class="exchange-badge">OKX</span>
+        <span class="exchange-badge">MEXC</span>
+        <span class="exchange-badge">BingX</span>
+        <span class="exchange-badge">Gate.io</span>
+        <span class="exchange-badge">Kraken</span>
+        <span class="exchange-badge">HTX</span>
+        <span class="exchange-badge">Bitunix</span>
+      </div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-brand-mobile">
+        <div class="logo-icon-large">DT</div>
+        <h1>Day Trader</h1>
+      </div>
+      <!-- Auth Tabs -->
+      <div class="auth-tabs" id="authTabs">
+        <button class="auth-tab active" data-tab="login" data-i18n="tab_login">Вход</button>
+        <button class="auth-tab" data-tab="register" data-i18n="tab_register">Регистрация</button>
+      </div>
+
+      <!-- Login Form -->
+      <div class="auth-form active" id="loginForm">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="loginEmail" placeholder="Введите email" data-i18n-placeholder="placeholder_email">
+        </div>
+        <div class="form-group">
+          <label data-i18n="label_password">Пароль</label>
+          <input type="password" id="loginPassword" placeholder="Введите пароль" data-i18n-placeholder="placeholder_password">
+        </div>
+        <button class="btn-primary" id="loginBtn" data-i18n="btn_login">Войти</button>
+      </div>
+
+      <!-- Register Form -->
+      <div class="auth-form" id="registerForm">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="regEmail" placeholder="Введите email" data-i18n-placeholder="placeholder_email">
+        </div>
+        <div class="form-group">
+          <label data-i18n="label_country">Страна</label>
+          <div class="country-select-wrap">
+            <select class="country-select" id="regCountry"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label data-i18n="label_reg_password">Придумайте пароль</label>
+          <input type="password" id="regPassword" placeholder="Минимум 6 символов" data-i18n-placeholder="placeholder_reg_password">
+        </div>
+        <div class="form-group">
+          <label data-i18n="label_reg_password2">Повторите пароль</label>
+          <input type="password" id="regPassword2" placeholder="Повторите пароль" data-i18n-placeholder="placeholder_reg_password2">
+        </div>
+        <button class="btn-primary" id="registerBtn" data-i18n="btn_register">Создать аккаунт</button>
+      </div>
+
+      <div class="auth-divider">
+        <span data-i18n="auth_or">или</span>
+      </div>
+
+      <div class="social-login-main">
+        <button class="social-btn-main google" data-provider="google">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          <span data-i18n="login_google">Войти через Google</span>
+        </button>
+        <button class="social-btn-main apple" data-provider="apple">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M11.182.008C11.148-.03 9.923.023 8.857 1.18c-1.066 1.156-.902 2.482-.878 2.516s1.52.087 2.475-1.258.762-2.391.728-2.43m3.314 11.733c-.048-.096-2.325-1.234-2.113-3.422s1.675-2.789 1.698-2.854-.597-.79-1.254-1.157a3.7 3.7 0 0 0-1.563-.434c-.108-.003-.483-.095-1.254.116-.508.139-1.653.589-1.968.607-.316.018-1.256-.522-2.267-.665-.647-.125-1.333.131-1.824.328-.49.196-1.422.754-2.074 2.237-.652 1.482-.311 3.83-.067 4.56s.625 1.924 1.273 2.796c.576.984 1.34 1.667 1.659 1.899s1.219.386 1.843.067c.502-.308 1.408-.485 1.766-.472.357.013 1.061.154 1.782.539.571.197 1.111.115 1.652-.105.541-.221 1.324-1.059 2.238-2.758q.52-1.185.473-1.282"/></svg>
+          <span data-i18n="login_apple">Войти через Apple</span>
+        </button>
+      </div>
+
+      <p class="auth-terms" data-i18n="auth_terms">Продолжая, вы соглашаетесь с <a href="#">условиями использования</a> и <a href="#">политикой конфиденциальности</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== APP ========== -->
+<div class="app hidden" id="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">DT</div>
+      <span class="logo-text">Day<span class="accent">Trader</span></span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title" data-i18n="nav_main">Основное</div>
+        <button class="nav-item active" data-page="dashboard">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+          <span data-i18n="nav_dashboard">Дашборд</span>
+        </button>
+        <button class="nav-item" data-page="journal">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+          <span data-i18n="nav_journal">Журнал сделок</span>
+        </button>
+        <button class="nav-item" data-page="calendar">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <span data-i18n="nav_calendar">Календарь</span>
+        </button>
+        <button class="nav-item" data-page="analytics">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          <span data-i18n="nav_analytics">Аналитика</span>
+        </button>
+        <button class="nav-item" data-page="charts">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
+          <span data-i18n="nav_charts">График</span>
+        </button>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title" data-i18n="nav_integrations">Интеграции</div>
+        <button class="nav-item" data-page="api">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span data-i18n="nav_api">API подключения</span>
+          <span class="nav-badge" id="apiBadge">0</span>
+        </button>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title" data-i18n="nav_system">Система</div>
+        <button class="nav-item" data-page="settings">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <span data-i18n="nav_settings">Настройки</span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-card" id="userCard">
+        <div class="user-avatar" id="userAvatar">CW</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">CryptoWhale</div>
+        </div>
+      </div>
+      <button class="logout-btn" id="logoutBtn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        <span data-i18n="btn_logout">Выход из аккаунта</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <div class="page-info">
+          <h2 class="page-title" id="pageTitle">Дашборд</h2>
+          <span class="breadcrumb">Day Trader <span class="sep">/</span> <span id="breadcrumbText">Обзор</span></span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <!-- Language Selector -->
+        <div class="lang-dropdown" id="langDropdown">
+          <button class="lang-btn" id="langBtn">
+            <span class="lang-flag" id="currentLangFlag">🇷🇺</span>
+            <span class="lang-code" id="currentLangCode">RU</span>
+            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div class="lang-menu" id="langMenu">
+            <button class="lang-option" data-lang="ru"><span class="lang-flag">🇷🇺</span> Русский</button>
+            <button class="lang-option" data-lang="en"><span class="lang-flag">🇬🇧</span> English</button>
+            <button class="lang-option" data-lang="de"><span class="lang-flag">🇩🇪</span> Deutsch</button>
+            <button class="lang-option" data-lang="es"><span class="lang-flag">🇪🇸</span> Español</button>
+            <button class="lang-option" data-lang="zh"><span class="lang-flag">🇨🇳</span> 中文</button>
+            <button class="lang-option" data-lang="tr"><span class="lang-flag">🇹🇷</span> Türkçe</button>
+            <button class="lang-option" data-lang="fr"><span class="lang-flag">🇫🇷</span> Français</button>
+            <button class="lang-option" data-lang="ar"><span class="lang-flag">🇸🇦</span> العربية</button>
+          </div>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+          <svg class="theme-icon moon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+          <svg class="theme-icon sun hidden" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        </button>
+
+        <div class="balance-pill" id="balancePill" style="cursor:pointer" title="История пополнений">
+          <span class="label" data-i18n="balance">Баланс</span>
+          <span class="value up" id="headerBalance">$47,832.50</span>
+          <span class="change">+2.4%</span>
+        </div>
+        <button class="topbar-btn" id="notifBtn" title="Уведомления">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span class="dot" id="notifDot"></span>
+        </button>
+      </div>
+    </header>
+
+    <div class="content" id="content">
+
+      <!-- ========== DASHBOARD ========== -->
+      <div class="page dashboard active" id="page-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card pnl fade-in" style="animation-delay:0.05s">
+            <div class="stat-header">
+              <span class="stat-label" data-i18n="stat_pnl">PnL</span>
+              <div class="stat-icon"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg></div>
+            </div>
+            <div class="stat-value pos" id="statPnl">+$12,847.32</div>
+            <span class="stat-change up"><span class="arrow">▲</span> +18.4%</span>
+          </div>
+          <div class="stat-card winrate fade-in" style="animation-delay:0.1s">
+            <div class="stat-header">
+              <span class="stat-label" data-i18n="stat_winrate">Win Rate</span>
+              <div class="stat-icon"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+            </div>
+            <div class="stat-value info" id="statWinrate">67.3%</div>
+            <span class="stat-change up"><span class="arrow">▲</span> +2.1%</span>
+          </div>
+          <div class="stat-card trades fade-in" style="animation-delay:0.15s">
+            <div class="stat-header">
+              <span class="stat-label" data-i18n="stat_trades">Всего сделок</span>
+              <div class="stat-icon"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg></div>
+            </div>
+            <div class="stat-value warning" id="statTrades">1,247</div>
+            <span class="stat-change up"><span class="arrow">▲</span> +34</span>
+          </div>
+          <div class="stat-card profit fade-in" style="animation-delay:0.2s">
+            <div class="stat-header">
+              <span class="stat-label" data-i18n="stat_risk_index">Индекс риска</span>
+              <div class="stat-icon"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+            </div>
+            <div class="stat-value danger" id="statPf">2.14</div>
+            <span class="stat-change up"><span class="arrow">▲</span> +0.08</span>
+          </div>
+        </div>
+
+        <div class="charts-row">
+          <div class="chart-card fade-in" style="animation-delay:0.25s">
+            <div class="chart-header">
+              <span class="chart-title" data-i18n="chart_pnl">Динамика PnL</span>
+              <div class="chart-actions" id="dashboardTimeframes">
+                <button class="chart-action active" data-range="1d" data-tf="1d">1D</button>
+                <button class="chart-action" data-range="7d" data-tf="7d">7D</button>
+                <button class="chart-action" data-range="30d" data-tf="30d">30D</button>
+              </div>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="pnlChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card fade-in" style="animation-delay:0.3s">
+            <div class="chart-header">
+              <span class="chart-title" data-i18n="chart_exchanges">Распределение по биржам</span>
+            </div>
+            <div class="donut-container">
+              <div class="donut-wrap">
+                <canvas id="exchangeChart" width="200" height="200"></canvas>
+                <div class="donut-center">
+                  <span class="donut-label" data-i18n="total">Всего</span>
+                  <span class="donut-value">$47.8K</span>
+                </div>
+              </div>
+              <div class="donut-legend" id="exchangeLegend"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRADE STYLES BAR -->
+        <div class="chart-card fade-in" style="animation-delay:0.32s;margin-top:20px">
+          <div class="chart-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <span class="chart-title" data-i18n="chart_trade_styles">Торговый стиль</span>
+          </div>
+          <div class="trade-styles-bar" id="tradeStylesBar">
+            <div class="trade-styles-stripe" id="tradeStylesStripe"></div>
+            <div class="trade-styles-legend" id="tradeStylesLegend"></div>
+          </div>
+        </div>
+
+        <div class="trades-section fade-in" style="animation-delay:0.35s">
+          <div class="section-header">
+            <h3 class="section-title" data-i18n="recent_trades">Последние сделки</h3>
+            <div class="section-actions">
+              <button class="btn-sm" id="importBtn">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                <span data-i18n="import_csv">Импорт CSV</span>
+              </button>
+              <input type="file" id="importFile" accept=".csv" style="display:none">
+              <button class="btn-sm" id="exportBtn">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                <span data-i18n="export_csv">Экспорт CSV</span>
+              </button>
+              <button class="btn-sm primary" data-nav="journal">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                <span data-i18n="all_trades">Все сделки</span>
+              </button>
+            </div>
+          </div>
+          <div class="trades-table-wrap">
+            <table class="trades-table" id="recentTradesTable">
+              <thead>
+                <tr>
+                  <th data-i18n="th_pair">Пара</th>
+                  <th data-i18n="th_exchange">Биржа</th>
+                  <th data-i18n="th_direction">Направление</th>
+                  <th data-i18n="th_entry_exit">Вход / Выход</th>
+                  <th data-i18n="th_pnl">PnL</th>
+                  <th data-i18n="th_status">Статус</th>
+                  <th data-i18n="th_time">Время</th>
+                </tr>
+              </thead>
+              <tbody id="recentTradesBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== JOURNAL ========== -->
+      <div class="page journal" id="page-journal">
+        <div class="journal-header">
+          <div class="journal-filters" id="journalFilters">
+            <button class="filter-chip active" data-filter="all" data-i18n="filter_all">Все</button>
+            <button class="filter-chip" data-filter="long">Long</button>
+            <button class="filter-chip" data-filter="short">Short</button>
+            <button class="filter-chip" data-filter="profit" data-i18n="filter_profit">Прибыльные</button>
+            <button class="filter-chip" data-filter="loss" data-i18n="filter_loss">Убыточные</button>
+          </div>
+          <div class="journal-search">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" placeholder="Поиск по паре или бирже..." id="journalSearch" data-i18n-placeholder="search_placeholder">
+          </div>
+        </div>
+        <div class="journal-days" id="journalDays"></div>
+      </div>
+
+      <!-- ========== CALENDAR ========== -->
+      <div class="page calendar" id="page-calendar">
+        <div class="calendar-header">
+          <div class="calendar-nav">
+            <button class="calendar-nav-btn" id="calPrev">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <h3 class="calendar-month" id="calMonth">Июль 2026</h3>
+            <button class="calendar-nav-btn" id="calNext">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+          <div class="calendar-summary">
+            <div class="cal-summary-item">
+              <span class="cal-summary-label" data-i18n="cal_month_pnl">PnL месяца</span>
+              <span class="cal-summary-value pos" id="calMonthPnl">+$8,420.50</span>
+            </div>
+            <div class="cal-summary-item">
+              <span class="cal-summary-label" data-i18n="cal_month_trades">Сделок</span>
+              <span class="cal-summary-value" id="calMonthTrades">42</span>
+            </div>
+            <div class="cal-summary-item">
+              <span class="cal-summary-label" data-i18n="cal_month_wr">Win Rate</span>
+              <span class="cal-summary-value" id="calMonthWr">64%</span>
+            </div>
+          </div>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+
+      <!-- ========== ANALYTICS ========== -->
+      <div class="page analytics" id="page-analytics">
+        <div class="analytics-timeframes">
+          <div class="chart-actions" id="analyticsTimeframes">
+            <button class="chart-action" data-range="1d">1D</button>
+            <button class="chart-action" data-range="7d">7D</button>
+            <button class="chart-action active" data-range="30d">30D</button>
+            <button class="chart-action" data-range="90d">90D</button>
+            <button class="chart-action" data-range="1y">1Y</button>
+          </div>
+        </div>
+        <div class="analytics-grid">
+          <div class="analytics-card fade-in">
+            <h3 data-i18n="analytics_sessions">Статистика по сессиям</h3>
+            <div class="session-stats" id="sessionStats"></div>
+          </div>
+          <div class="analytics-card fade-in">
+            <h3 data-i18n="analytics_metrics">Ключевые метрики</h3>
+            <div class="metrics-list" id="metricsList"></div>
+          </div>
+          <div class="analytics-card full fade-in">
+            <h3 data-i18n="analytics_pnl_dynamics">Динамика PnL в $</h3>
+            <div class="chart-canvas-container" style="height:320px">
+              <canvas id="pnlDynamicsChart"></canvas>
+            </div>
+          </div>
+          <div class="analytics-card fade-in">
+            <h3 data-i18n="analytics_top">Топ-5 прибыльных пар</h3>
+            <div class="top-pairs" id="topPairs"></div>
+          </div>
+          <div class="analytics-card fade-in">
+            <h3 data-i18n="analytics_worst">Топ-5 убыточных пар</h3>
+            <div class="worst-pairs" id="worstPairs"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== CHARTS ========== -->
+      <div class="page charts" id="page-charts">
+        <div class="charts-page-layout">
+          <div class="chart-left-col">
+            <div class="chart-card tv-card fade-in">
+              <div class="chart-header">
+                <span class="chart-title" data-i18n="tv_chart">График TradingView</span>
+                <div class="pair-selector">
+                  <select id="tvPairSelect" class="settings-select">
+                    <option value="BINANCE:BTCUSDT">BTC/USDT</option>
+                    <option value="BINANCE:ETHUSDT">ETH/USDT</option>
+                    <option value="BINANCE:SOLUSDT">SOL/USDT</option>
+                    <option value="BINANCE:BNBUSDT">BNB/USDT</option>
+                    <option value="BINANCE:XRPUSDT">XRP/USDT</option>
+                    <option value="BINANCE:DOGEUSDT">DOGE/USDT</option>
+                    <option value="BINANCE:ADAUSDT">ADA/USDT</option>
+                    <option value="BINANCE:AVAXUSDT">AVAX/USDT</option>
+                    <option value="BINANCE:LINKUSDT">LINK/USDT</option>
+                    <option value="BINANCE:DOTUSDT">DOT/USDT</option>
+                    <option value="BINANCE:MATICUSDT">MATIC/USDT</option>
+                    <option value="BINANCE:LTCUSDT">LTC/USDT</option>
+                    <option value="BINANCE:TRXUSDT">TRX/USDT</option>
+                  </select>
+                </div>
+              </div>
+              <div class="tv-chart-wrap" id="tvChartWrap">
+                <iframe id="tvChartFrame" src="https://www.tradingview.com/widgetembed/?frameElementId=tvChartFrame&symbol=BINANCE:BTCUSDT&interval=60&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=exchange&withdateranges=1&showpopupbutton=1&studies_access=%7B%22type%22%3A%22black%22%2C%22tools%22%3A%5B%7B%22name%22%3A%22MASimple%22%2C%22grayed%22%3Afalse%7D%2C%7B%22name%22%3A%22RSI%22%2C%22grayed%22%3Afalse%7D%2C%7B%22name%22%3A%22StochasticRSI%22%2C%22grayed%22%3Afalse%7D%5D%7D&locale=ru" style="width:100%;height:520px;border:none;"></iframe>
+              </div>
+            </div>
+          </div>
+          <div class="chart-right-col">
+            <div class="chart-card indicators-card fade-in">
+              <h3 data-i18n="fear_greed">Индекс страха и жадности</h3>
+              <div class="fg-index" id="fgIndex">
+                <div class="fg-gauge">
+                  <div class="fg-needle" id="fgNeedle"></div>
+                  <div class="fg-labels">
+                    <span>Страх</span>
+                    <span>Нейтрально</span>
+                    <span>Жадность</span>
+                  </div>
+                </div>
+                <div class="fg-value" id="fgValue">74 — Жадность</div>
+                <div class="fg-desc" id="fgDesc">Рынок в состоянии жадности. Инвесторы покупают агрессивно.</div>
+              </div>
+            </div>
+            <div class="chart-card indicators-card fade-in">
+              <h3 data-i18n="tech_summary">Технический анализ</h3>
+              <div class="tech-summary" id="techSummary">
+                <div class="ts-row">
+                  <span class="ts-label">Осцилляторы</span>
+                  <span class="ts-badge buy">Покупать</span>
+                </div>
+                <div class="ts-detail">RSI (14): 62.4 — Нейтрально<br>Stochastic: 78.2 — Покупать<br>MACD: 145.3 — Покупать<br>CCI (20): 112.6 — Покупать</div>
+                <div class="ts-row">
+                  <span class="ts-label">Скользящие средние</span>
+                  <span class="ts-badge buy">Покупать</span>
+                </div>
+                <div class="ts-detail">EMA (10): Выше цены — Покупать<br>SMA (20): Выше цены — Покупать<br>EMA (50): Ниже цены — Продавать<br>SMA (100): Ниже цены — Продавать</div>
+                <div class="ts-row total">
+                  <span class="ts-label">Общий сигнал</span>
+                  <span class="ts-badge buy" id="tsTotal">Покупать</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== API CONNECTIONS ========== -->
+      <!-- ========== EXCHANGES PAGE ========== -->
+      <div class="page api" id="page-api">
+        <div class="exchanges-header">
+          <div>
+            <h2 data-i18n="exchanges_title">Биржи</h2>
+            <p class="exchanges-subtitle" data-i18n="exchanges_subtitle">Подключите API-ключи ваших бирж для автоматической синхронизации сделок</p>
+          </div>
+          <div class="exchanges-stats" id="exchangesStats"></div>
+        </div>
+
+        <!-- Connected Exchanges Section -->
+        <div class="exchanges-section" id="connectedSection" style="display:none">
+          <h3 class="exchanges-section-title" data-i18n="exchanges_connected">Подключённые биржи</h3>
+          <div class="exchanges-connected-list" id="connectedList"></div>
+        </div>
+
+        <!-- Available Exchanges Grid -->
+        <h3 class="exchanges-section-title" data-i18n="exchanges_available">Доступные биржи</h3>
+        <div class="exchanges-grid" id="exchangesGrid"></div>
+
+        <!-- Security Info -->
+        <div class="api-security">
+          <div class="security-icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          </div>
+          <div class="security-text">
+            <h4 data-i18n="api_security_title">Безопасность API-ключей</h4>
+            <p data-i18n="api_security_desc">Все ключи шифруются с помощью AES-256 в вашем браузере. Мы используем только read-only разрешения. Ваши средства в безопасности — мы никогда не запрашиваем права на торговлю или вывод.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== SETTINGS ========== -->
+      <div class="page settings" id="page-settings">
+        <div class="settings-card">
+          <h3 data-i18n="set_profile">Профиль</h3>
+          <p data-i18n="set_profile_desc">Управление данными вашего аккаунта</p>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label" data-i18n="set_avatar">Аватарка</div>
+              <div class="settings-desc" data-i18n="set_avatar_desc">Загрузите фото профиля</div>
+            </div>
+            <div class="avatar-upload" style="display:flex;align-items:center;gap:12px">
+              <div class="avatar-preview" id="avatarPreview" style="width:48px;height:48px;border-radius:50%;overflow:hidden;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <img id="avatarImg" src="" style="width:100%;height:100%;object-fit:cover;display:none">
+                <span id="avatarFallback" style="font-size:1.2rem;font-weight:700;color:var(--bg-primary);background:linear-gradient(135deg,var(--accent),var(--accent-hover));width:100%;height:100%;display:flex;align-items:center;justify-content:center">CW</span>
+              </div>
+              <label class="btn-sm" style="cursor:pointer;position:relative">
+                <input type="file" id="avatarInput" accept="image/*" style="display:none">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span data-i18n="btn_upload">Загрузить</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div>
+              <div class="settings-label" data-i18n="set_name">Имя трейдера</div>
+              <div class="settings-desc" data-i18n="set_name_desc">Отображается в профиле и рейтингах</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input type="text" class="settings-input" value="CryptoWhale" id="settingName">
+              <button class="btn-sm" id="saveNameBtn" data-i18n="btn_save_name">Сохранить</button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label" data-i18n="set_email">Email</div>
+              <div class="settings-desc" data-i18n="set_email_desc">Для уведомлений и входа</div>
+            </div>
+            <input type="email" class="settings-input" value="trader@example.com" id="settingEmail">
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label" data-i18n="set_currency">Валюта отображения</div>
+              <div class="settings-desc" data-i18n="set_currency_desc">Основная валюта для всех расчётов</div>
+            </div>
+            <select class="settings-select" id="settingCurrency">
+              <option value="USD" selected>USD ($)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 data-i18n="set_notif">Уведомления</h3>
+          <p data-i18n="set_notif_desc">Настройте способы получения оповещений</p>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label" data-i18n="set_notif_trades">Новые сделки</div>
+              <div class="settings-desc" data-i18n="set_notif_trades_desc">Уведомление при каждой новой сделке</div>
+            </div>
+            <div class="toggle on" data-setting="notifTrades"></div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label" data-i18n="set_notif_daily">Дневной отчёт</div>
+              <div class="settings-desc" data-i18n="set_notif_daily_desc">Сводка результатов за день</div>
+            </div>
+            <div class="toggle on" data-setting="notifDaily"></div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label" data-i18n="set_notif_signals">Сигналы</div>
+              <div class="settings-desc" data-i18n="set_notif_signals_desc">Новые торговые идеи</div>
+            </div>
+            <div class="toggle" data-setting="notifSignals"></div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label" data-i18n="set_notif_email">Email-уведомления</div>
+              <div class="settings-desc" data-i18n="set_notif_email_desc">Дублировать в почту</div>
+            </div>
+            <div class="toggle" data-setting="notifEmail"></div>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 data-i18n="set_privacy">Приватность</h3>
+          <p data-i18n="set_privacy_desc">Управление видимостью ваших данных</p>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label" data-i18n="set_public">Публичный профиль</div>
+              <div class="settings-desc" data-i18n="set_public_desc">Другие трейдеры видят вашу статистику</div>
+            </div>
+            <div class="toggle" data-setting="publicProfile"></div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label" data-i18n="set_balance">Показывать баланс</div>
+              <div class="settings-desc" data-i18n="set_balance_desc">Отображать сумму баланса в профиле</div>
+            </div>
+            <div class="toggle" data-setting="showBalance"></div>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 data-i18n="set_security">Безопасность</h3>
+          <p data-i18n="set_security_desc">Изменение пароля аккаунта</p>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label" data-i18n="set_current_password">Текущий пароль</div>
+              <div class="settings-desc" data-i18n="set_current_password_desc">Введите текущий пароль для подтверждения</div>
+            </div>
+            <input type="password" class="settings-input" id="settingCurrentPassword" data-i18n-placeholder="placeholder_current_password">
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label" data-i18n="set_new_password">Новый пароль</div>
+              <div class="settings-desc" data-i18n="set_new_password_desc">Минимум 6 символов</div>
+            </div>
+            <input type="password" class="settings-input" id="settingNewPassword" data-i18n-placeholder="placeholder_new_password">
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label" data-i18n="set_confirm_password">Подтвердите новый пароль</div>
+              <div class="settings-desc" data-i18n="set_confirm_password_desc">Повторите новый пароль</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input type="password" class="settings-input" id="settingConfirmPassword" data-i18n-placeholder="placeholder_confirm_password">
+              <button class="btn-sm primary" id="changePasswordBtn" data-i18n="btn_change_password">Изменить</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-card danger-zone">
+          <h3 data-i18n="set_danger">Опасная зона</h3>
+          <p data-i18n="set_danger_desc">Необратимые действия</p>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label" data-i18n="set_clear">Очистить все сделки</div>
+              <div class="settings-desc" data-i18n="set_clear_desc">Удалить всю историю торговли</div>
+            </div>
+            <button class="btn-sm danger" id="clearTradesBtn" data-i18n="btn_clear">Очистить</button>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label" data-i18n="set_delete">Удалить аккаунт</div>
+              <div class="settings-desc" data-i18n="set_delete_desc">Полное удаление всех данных</div>
+            </div>
+            <button class="btn-sm danger" id="deleteAccountBtn" data-i18n="btn_delete">Удалить</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ========== EXCHANGE CONNECT MODAL ========== -->
+<div class="modal-overlay" id="apiModal">
+  <div class="modal" style="width:680px;max-width:95vw">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <div class="modal-exchange-icon" id="modalExchangeIcon"></div>
+        <span class="modal-title" id="modalTitle" data-i18n="modal_api_title">Подключение API</span>
+      </div>
+      <button class="modal-close" id="modalClose">&times;</button>
+    </div>
+    <div class="exchange-connect-body">
+      <!-- Instructions Panel -->
+      <div class="exchange-instructions" id="exchangeInstructions">
+        <div class="exchange-instructions-title" data-i18n="instructions_title">Как получить API-ключ</div>
+        <ol class="exchange-instructions-list" id="instructionsList"></ol>
+        <div class="exchange-instructions-warn" id="instructionsWarn" style="display:none"></div>
+      </div>
+      <!-- Form Panel -->
+      <form class="modal-form" id="apiForm" style="flex:1;min-width:0">
+        <div class="exchange-form-fields" id="exchangeFormFields"></div>
+        <div class="exchange-test-result" id="exchangeTestResult" style="display:none"></div>
+        <div class="modal-actions" style="margin-top:16px">
+          <button type="button" class="btn-secondary" id="modalCancel" data-i18n="btn_cancel">Отмена</button>
+          <button type="button" class="btn-secondary" id="modalTestBtn" data-i18n="btn_test">Проверить</button>
+          <button type="submit" class="btn-primary">
+            <span class="btn-text" data-i18n="btn_connect">Подключить</span>
+            <span class="btn-loader hidden"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ========== TRADE NOTE MODAL ========== -->
+<div class="modal-overlay" id="noteModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <span class="modal-title" data-i18n="modal_note_title">Заметка к сделке</span>
+      <button class="modal-close" id="noteModalClose">&times;</button>
+    </div>
+    <div class="modal-form">
+      <div class="form-group">
+        <label><span data-i18n="trade">Сделка</span> <span id="noteTradeId"></span></label>
+        <textarea class="modal-textarea" placeholder="Опишите вашу мысль, эмоции, что пошло не так или отлично..." id="noteText" rows="5" data-i18n-placeholder="note_placeholder"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="noteCancel" data-i18n="btn_cancel">Отмена</button>
+        <button type="button" class="btn-primary" id="noteSave" data-i18n="btn_save">Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== CONFIRM MODAL ========== -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <span class="modal-title" id="confirmTitle" data-i18n="confirm_title">Подтверждение</span>
+    </div>
+    <p class="confirm-text" id="confirmText" data-i18n="confirm_text">Вы уверены?</p>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" id="confirmCancel" data-i18n="btn_cancel">Отмена</button>
+      <button type="button" class="btn-primary danger" id="confirmOk" data-i18n="btn_confirm">Подтвердить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== TRADE CHART MODAL ========== -->
+<div class="modal-overlay" id="tradeChartModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="modal-title" id="tradeChartTitle">BTC/USDT</span>
+        <span class="modal-subtitle" id="tradeChartSubtitle">Binance · LONG</span>
+      </div>
+      <div class="chart-tf-switcher" id="chartTfSwitcher">
+        <button class="chart-action" data-tf="5m">5m</button>
+        <button class="chart-action" data-tf="15m">15m</button>
+        <button class="chart-action active" data-tf="1h">1h</button>
+        <button class="chart-action" data-tf="4h">4h</button>
+        <button class="chart-action" data-tf="1d">1d</button>
+      </div>
+      <button class="modal-close" id="tradeChartClose">&times;</button>
+    </div>
+    <div class="trade-chart-info">
+      <div class="trade-info-item">
+        <span class="trade-info-label" data-i18n="entry_price">Вход</span>
+        <span class="trade-info-value" id="chartEntryPrice">—</span>
+      </div>
+      <div class="trade-info-item">
+        <span class="trade-info-label" data-i18n="exit_price">Выход</span>
+        <span class="trade-info-value" id="chartExitPrice">—</span>
+      </div>
+      <div class="trade-info-item">
+        <span class="trade-info-label" data-i18n="trade_pnl">PnL</span>
+        <span class="trade-info-value" id="chartTradePnl">—</span>
+      </div>
+      <div class="trade-info-item">
+        <span class="trade-info-label" data-i18n="trade_size">Размер</span>
+        <span class="trade-info-value" id="chartTradeSize">—</span>
+      </div>
+    </div>
+    <div class="tv-chart-wrap trade-tv-wrap" id="tradeTvWrap">
+      <iframe id="tradeTvFrame" src="" style="width:100%;height:420px;border:none;border-radius:var(--radius-md);"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- ========== CALENDAR DAY MODAL ========== -->
+<div class="modal-overlay" id="dayModal">
+  <div class="modal modal-lg" style="width:960px">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="modal-title" id="dayModalTitle">13 Июля 2026</span>
+      </div>
+      <button class="modal-close" id="dayModalClose">&times;</button>
+    </div>
+    <div class="day-modal-stats" id="dayModalStats"></div>
+    <div class="day-modal-trades" id="dayModalTrades"></div>
+  </div>
+</div>
+
+<!-- ========== POSTER MODAL ========== -->
+<div class="modal-overlay" id="posterModal">
+  <div class="modal modal-lg" style="width:520px">
+    <div class="modal-header">
+      <span class="modal-title" data-i18n="poster_title">Репост сделки</span>
+      <button class="modal-close" id="posterModalClose">&times;</button>
+    </div>
+    <div class="poster-preview-wrap" style="display:flex;justify-content:center;margin-bottom:20px">
+      <canvas id="posterCanvas" width="800" height="1000" style="max-width:340px;height:auto;border-radius:12px;box-shadow:var(--shadow-lg)"></canvas>
+    </div>
+    <div class="poster-actions" style="display:flex;gap:10px;justify-content:center;margin-bottom:10px">
+      <button class="btn-sm" id="posterThemeDark" data-i18n="poster_theme_dark">Тёмная тема</button>
+      <button class="btn-sm" id="posterThemeLight" data-i18n="poster_theme_light">Светлая тема</button>
+    </div>
+    <div class="poster-pnl-mode" style="display:flex;gap:10px;justify-content:center;margin-bottom:16px">
+      <button class="btn-sm active" id="posterPnlProfit" data-i18n="poster_pnl_profit">Прибыль</button>
+      <button class="btn-sm" id="posterPnlPercent" data-i18n="poster_pnl_percent">Только %</button>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" id="posterCancel" data-i18n="btn_cancel">Отмена</button>
+      <button type="button" class="btn-primary" id="posterDownload">
+        <span data-i18n="btn_download_poster">Скачать постер</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== BALANCE HISTORY MODAL ========== -->
+<div class="modal-overlay" id="balanceModal">
+  <div class="modal" style="width:640px">
+    <div class="modal-header">
+      <span class="modal-title" data-i18n="balance_history_title">История пополнений</span>
+      <button class="modal-close" id="balanceModalClose">&times;</button>
+    </div>
+    <div class="balance-history-list" id="balanceHistoryList"></div>
+  </div>
+</div>
+
+<!-- ========== NOTIFICATIONS PANEL ========== -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-panel-header">
+    <span data-i18n="notifications">Уведомления</span>
+    <button class="notif-clear" id="notifClear" data-i18n="clear_all">Очистить</button>
+  </div>
+  <div class="notif-list" id="notifList"></div>
+</div>
+
+<!-- ========== TOAST CONTAINER ========== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ========== SCRIPTS ========== -->
+<script src="js/app.js?v=8"></script>
+</body>
+</html>
